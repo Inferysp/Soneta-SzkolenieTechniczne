@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Soneta.Szkolenie.UI": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Source\\Repos\\soneta.git\\bin\\Debug\\SonetaExplorer.exe",
+      "commandLineArgs": "/extpath=\"C:\\dodatki\\Soneta.Szkolenie\""
+    }
+  }
+}

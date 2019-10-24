@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Soneta.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(SonetaTargetFramework)</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Szkolenie.business.cs">
+      <DependentUpon>Szkolenie.business.xml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Szkolenie.business.xml">
+      <Generator>BusinessGenerator</Generator>
+    </None>
+  </ItemGroup>
+</Project>
