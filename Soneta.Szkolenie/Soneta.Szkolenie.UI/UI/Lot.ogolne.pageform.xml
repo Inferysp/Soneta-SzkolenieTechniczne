@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0"?>
 
-<DataForm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<DataForm xmlns="http://www.enova.pl/schema/form.xsd"
+          xsi:schemaLocation="http://www.enova.pl/schema/ http://www.enova.pl/schema/form.xsd"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-          xmlns="http://www.enova.pl/schema/form.xsd"
           RightName="Page:OgólnePage"
           Priority="3"
           DataType="Soneta.Szkolenie.Lot,Soneta.Szkolenie">

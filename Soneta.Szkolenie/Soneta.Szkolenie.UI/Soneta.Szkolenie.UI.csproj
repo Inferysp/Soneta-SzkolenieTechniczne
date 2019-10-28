@@ -9,4 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Soneta.Szkolenie\Soneta.Szkolenie.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="UI\UstawRabatWorkerParams.Ogolne.pageform.xml" />
+  </ItemGroup>
 </Project>

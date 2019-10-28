@@ -1,6 +1,9 @@
 ﻿using Soneta.Business;
+using Soneta.CRM;
+using Soneta.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,5 +29,25 @@ namespace Soneta.Szkolenie
             base.OnAdded();
             this.CzyOplacona = CzyOplacone.Nieoplacone;
         }
+
+        [AttributeInheritance]
+        public new Lot Lot
+        {
+            get => base.Lot;
+            set
+            {
+                base.Lot = value;
+
+                var poRabacie = Percent.Hundred;
+                if (Klient != null)
+                    poRabacie -= Klient.Rabat;
+
+                CenaLotu = Lot.Cena * poRabacie;
+            }
+        }
+
+        [AttributeInheritance]
+        [Description("Cena za lot po uwzględnieniu rabatu")]
+        public new Currency CenaLotu { get; set; }
     }
 }

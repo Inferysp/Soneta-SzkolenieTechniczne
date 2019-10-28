@@ -2,7 +2,7 @@
   "profiles": {
     "Soneta.Szkolenie.UI": {
       "commandName": "Executable",
-      "executablePath": "D:\\Source\\Repos\\soneta.git\\bin\\Debug\\SonetaExplorer.exe",
+      "executablePath": "C:\\Program Files (x86)\\Soneta\\enova365 1908.0.2.17471\\SonetaExplorer.exe",
       "commandLineArgs": "/extpath=\"C:\\dodatki\\Soneta.Szkolenie\""
     }
   }

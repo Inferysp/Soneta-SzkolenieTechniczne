@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>$(SonetaTargetFramework)</TargetFramework>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>C:\dodatki\Soneta.Szkolenie\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Update="Szkolenie.business.cs">
       <DependentUpon>Szkolenie.business.xml</DependentUpon>

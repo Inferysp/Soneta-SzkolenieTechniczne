@@ -21,22 +21,22 @@
     BrickColor = FolderViewAttribute.YellowBrick // opcjonalne: ten jeden kafel będzie żółty
 )]
 
-[assembly: FolderView("Loty widokowe/Katalog maszyn",
-    Priority = 1,
-    Description = "Katalog maszyn",
-    TableName = "Maszyny",
-    ViewType = typeof(Soneta.Szkolenie.UI.KatalogMaszynViewInfo)
-)]
-
 [assembly: FolderView("Loty widokowe/Katalog lotów",
-    Priority = 2,
+    Priority = 100,
     Description = "Katalog lotów",
     TableName = "Loty",
     ViewType = typeof(Soneta.Szkolenie.UI.KatalogLotowViewInfo)
 )]
 
+[assembly: FolderView("Loty widokowe/Katalog maszyn",
+    Priority = 200,
+    Description = "Katalog maszyn",
+    TableName = "Maszyny",
+    ViewType = typeof(Soneta.Szkolenie.UI.KatalogMaszynViewInfo)
+)]
+
 [assembly: FolderView("Loty widokowe/Rezerwacje",
-    Priority = 3,
+    Priority = 300,
     Description = "Lista rezerwacji",
     TableName = "Rezerwacje",
     ViewType = typeof(Soneta.Szkolenie.UI.RezerwacjeViewInfo)

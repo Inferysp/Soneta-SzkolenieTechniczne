@@ -17,7 +17,7 @@ using Soneta.Business;
 using Soneta.CRM;
 using Soneta.Szkolenie;
 
-[assembly: ModuleType("Szkolenie", typeof(Soneta.Szkolenie.SzkolenieModule), 4, "SonetaSzkolenie", 3, VersionNumber=2)]
+[assembly: ModuleType("Szkolenie", typeof(Soneta.Szkolenie.SzkolenieModule), 4, "SonetaSzkolenie", 3, VersionNumber=1)]
 
 namespace Soneta.Szkolenie {
 
@@ -41,385 +41,6 @@ namespace Soneta.Szkolenie {
 
 		[Browsable(false)]
 		public CRMModule CRM => moduleCRM ?? (moduleCRM = CRMModule.GetInstance(Session));
-
-		private static Soneta.Business.App.TableInfo tableInfoMaszyny = new Soneta.Business.App.TableInfo.Create<Maszyny, Maszyna, MaszynaRecord>("Maszyna") {
-		};
-
-		public Maszyny Maszyny => (Maszyny)Session.Tables[tableInfoMaszyny];
-
-		private static Soneta.Business.App.KeyInfo keyInfoMaszynaWgNrBoczny = new Soneta.Business.App.KeyInfo(tableInfoMaszyny, table => new MaszynaTable.WgNrBocznyKey(table)) {
-			Name = "WgNrBoczny",
-			Unique = true,
-			PrimaryKey = true,
-			KeyFields = new[] {"NrBoczny"},
-		};
-
-		/// <summary>
-		/// Klasa implementująca standardową obsługę tabeli obiektów Maszyna.
-		/// Dziedzicząca klasa <see cref="Maszyny"/> zawiera kod użytkownika
-		/// zawierający specyficzną funkcjonalność tabeli, która nie zawiera się w funkcjonalności
-		/// biblioteki <see cref="Soneta.Business"/>.
-		/// </summary>
-		/// <seealso cref="Maszyny"/>
-		/// <seealso cref="MaszynaRow"/>
-		/// <seealso cref="Maszyna"/>
-		/// <seealso cref="Soneta.Business.Table"/>
-		[Caption("Tabela maszyn którymi można odbyć lot")]
-		public abstract partial class MaszynaTable : GuidedTable {
-
-			protected MaszynaTable() {}
-
-			public class WgNrBocznyKey : Key<Maszyna> {
-				internal WgNrBocznyKey(Table table) : base(table) {
-				}
-
-				protected override object[] GetData(Row row, Record rec) => new object[] {
-					((MaszynaRecord)rec).NrBoczny.TrimEnd()
-				};
-
-				public Maszyna this[string nrboczny] => (Maszyna)Find(nrboczny);
-			}
-
-			public WgNrBocznyKey WgNrBoczny => (WgNrBocznyKey)Session.Keys[keyInfoMaszynaWgNrBoczny];
-
-
-			/// <summary>
-			/// Typowane property dostarczające obiekt modułu zawierającegą tą tabelę. Umożliwia dostęp do
-			/// innych obiektów znajdujących się w tym samym module.
-			/// </summary>
-			/// <seealso cref="SzkolenieModule"/>
-			public new SzkolenieModule Module => (SzkolenieModule)base.Module;
-
-			/// <summary>
-			/// Typowany indekser dostarczający obiekty znajdujące się w tej tabeli przy pomocy 
-			/// ID identyfikującego jednoznacznie obiekt w systemie.
-			/// </summary>
-			/// <param name="id">Liczba będąca unikalnym identyfikatorem obiektu. Wartości
-			/// ujemne identyfikują obiekty, które zostały dodane i nie są jeszcze zapisane do bazy danych.</param>
-			/// <seealso cref="Maszyna"/>
-			public new Maszyna this[int id] => (Maszyna)base[id];
-
-			/// <summary>
-			/// Typowany indekser dostarczający obiekty znajdujące się w tej tabeli przy pomocy 
-			/// tablicy ID identyfikujących jednoznacznie obiekt w systemie.
-			/// </summary>
-			/// <param name="id">Tablica liczb będąca unikalnymi identyfikatorami obiektu. Wartości
-			/// ujemne identyfikują obiekty, które zostały dodane i nie są jeszcze zapisane do bazy danych.</param>
-			/// <seealso cref="Maszyna"/>
-			public new Maszyna[] this[int[] ids] => (Maszyna[])base[ids];
-
-			public new Maszyna this[Guid guid] => (Maszyna)base[guid];
-
-			protected override Row CreateRow(RowCreator creator) => new Maszyna();
-
-			[Soneta.Langs.TranslateIgnore]
-			protected override sealed void PrepareNames(StringBuilder names, string divider) {
-				names.Append(divider); names.Append("Guid");
-				names.Append(divider); names.Append("NrBoczny");
-				names.Append(divider); names.Append("Producent");
-				names.Append(divider); names.Append("Model");
-				names.Append(divider); names.Append("DataProd");
-				names.Append(divider); names.Append("Uwagi");
-			}
-
-		}
-
-		public abstract partial class MaszynaRow : GuidedRow {
-
-			private MaszynaRecord record;
-
-			protected override void AssignRecord(Record rec) {
-				record = (MaszynaRecord)rec;
-			}
-
-			protected MaszynaRow() : base(true) {
-			}
-
-			[MaxLength(6)]
-			[Required]
-			public string NrBoczny {
-				get {
-					if (record==null) GetRecord();
-					return record.NrBoczny;
-				}
-				set {
-					MaszynaSchema.NrBocznyBeforeEdit?.Invoke((Maszyna)this, ref value);
-					if (value!=null) value = value.TrimEnd();
-					if (string.IsNullOrEmpty(value)) throw new RequiredException(this, "NrBoczny");
-					if (value.Length>NrBocznyLength) throw new ValueToLongException(this, "NrBoczny", NrBocznyLength);
-					GetEdit(record==null, false);
-					record.NrBoczny = value;
-					if (State!=RowState.Detached) {
-						ResyncSet(keyInfoMaszynaWgNrBoczny);
-						Session.Verifiers.Add(new Maszyna.NrBocznyPoprawny((Maszyna)this));
-					}
-					MaszynaSchema.NrBocznyAfterEdit?.Invoke((Maszyna)this);
-				}
-			}
-
-			public const int NrBocznyLength = 6;
-
-			[MaxLength(20)]
-			public string Producent {
-				get {
-					if (record==null) GetRecord();
-					return record.Producent;
-				}
-				set {
-					MaszynaSchema.ProducentBeforeEdit?.Invoke((Maszyna)this, ref value);
-					if (value!=null) value = value.TrimEnd();
-					if (value.Length>ProducentLength) throw new ValueToLongException(this, "Producent", ProducentLength);
-					GetEdit(record==null, false);
-					record.Producent = value;
-					MaszynaSchema.ProducentAfterEdit?.Invoke((Maszyna)this);
-				}
-			}
-
-			public const int ProducentLength = 20;
-
-			[MaxLength(20)]
-			[Required]
-			public string Model {
-				get {
-					if (record==null) GetRecord();
-					return record.Model;
-				}
-				set {
-					MaszynaSchema.ModelBeforeEdit?.Invoke((Maszyna)this, ref value);
-					if (value!=null) value = value.TrimEnd();
-					if (string.IsNullOrEmpty(value)) throw new RequiredException(this, "Model");
-					if (value.Length>ModelLength) throw new ValueToLongException(this, "Model", ModelLength);
-					GetEdit(record==null, false);
-					record.Model = value;
-					MaszynaSchema.ModelAfterEdit?.Invoke((Maszyna)this);
-				}
-			}
-
-			public const int ModelLength = 20;
-
-			[Required]
-			public Date DataProd {
-				get {
-					if (record==null) GetRecord();
-					return record.DataProd;
-				}
-				set {
-					MaszynaSchema.DataProdBeforeEdit?.Invoke((Maszyna)this, ref value);
-					if (value==Date.MinValue) throw new RequiredException(this, "DataProd");
-					GetEdit(record==null, false);
-					record.DataProd = value;
-					MaszynaSchema.DataProdAfterEdit?.Invoke((Maszyna)this);
-				}
-			}
-
-			[MaxLength(200)]
-			public string Uwagi {
-				get {
-					if (record==null) GetRecord();
-					return record.Uwagi;
-				}
-				set {
-					MaszynaSchema.UwagiBeforeEdit?.Invoke((Maszyna)this, ref value);
-					if (value!=null) value = value.TrimEnd();
-					if (value.Length>UwagiLength) throw new ValueToLongException(this, "Uwagi", UwagiLength);
-					GetEdit(record==null, false);
-					record.Uwagi = value;
-					MaszynaSchema.UwagiAfterEdit?.Invoke((Maszyna)this);
-				}
-			}
-
-			public const int UwagiLength = 200;
-
-			[ChildTable("Rezerwacja", "Soneta.Szkolenie.Rezerwacja", "Maszyna")]
-			public SubTable<Rezerwacja> Fields => (SubTable<Rezerwacja>)Table.Module.Rezerwacje.WgMaszyna.CreateSubTable(this);
-
-			[Browsable(false)]
-			public new Maszyny Table => (Maszyny)base.Table;
-
-			[Browsable(false)]
-			public SzkolenieModule Module => Table.Module;
-
-			protected override Soneta.Business.App.TableInfo TableInfo => tableInfoMaszyny;
-
-			public sealed override AccessRights GetObjectRight() {
-				AccessRights ar = CalcObjectRight();
-				MaszynaSchema.OnCalcObjectRight?.Invoke((Maszyna)this, ref ar);
-				return ar;
-			}
-
-			protected sealed override AccessRights GetParentsObjectRight() {
-				AccessRights result = CalcParentsObjectRight();
-				MaszynaSchema.OnCalcParentsObjectRight?.Invoke((Maszyna)this, ref result);
-				return result;
-			}
-
-			protected override bool CalcReadOnly() {
-				bool result = false;
-				MaszynaSchema.OnCalcReadOnly?.Invoke((Maszyna)this, ref result);
-				return result;
-			}
-
-			class NrBocznyRequiredVerifier : RequiredVerifier {
-				internal NrBocznyRequiredVerifier(IRow row) : base(row, "NrBoczny") {
-				}
-				protected override bool IsValid() => !(string.IsNullOrEmpty(((MaszynaRow)Row).NrBoczny));
-			}
-
-			class ModelRequiredVerifier : RequiredVerifier {
-				internal ModelRequiredVerifier(IRow row) : base(row, "Model") {
-				}
-				protected override bool IsValid() => !(string.IsNullOrEmpty(((MaszynaRow)Row).Model));
-			}
-
-			class DataProdRequiredVerifier : RequiredVerifier {
-				internal DataProdRequiredVerifier(IRow row) : base(row, "DataProd") {
-				}
-				protected override bool IsValid() => !(((MaszynaRow)Row).DataProd==Date.MinValue);
-			}
-
-			protected override void OnAdded() {
-				base.OnAdded();
-				Session.Verifiers.Add(new NrBocznyRequiredVerifier(this));
-				Session.Verifiers.Add(new ModelRequiredVerifier(this));
-				Session.Verifiers.Add(new DataProdRequiredVerifier(this));
-				MaszynaSchema.OnAdded?.Invoke((Maszyna)this);
-			}
-
-			protected override void OnLoaded() {
-				base.OnLoaded();
-				MaszynaSchema.OnLoaded?.Invoke((Maszyna)this);
-			}
-
-			protected override void OnEditing() {
-				base.OnEditing();
-				MaszynaSchema.OnEditing?.Invoke((Maszyna)this);
-			}
-
-			protected override void OnDeleting() {
-				base.OnDeleting();
-				MaszynaSchema.OnDeleting?.Invoke((Maszyna)this);
-			}
-
-			protected override void OnDeleted() {
-				base.OnDeleted();
-				MaszynaSchema.OnDeleted?.Invoke((Maszyna)this);
-			}
-
-			protected override void OnRepacked() {
-				base.OnRepacked();
-				MaszynaSchema.OnRepacked?.Invoke((Maszyna)this);
-			}
-
-		}
-
-		public sealed class MaszynaRecord : GuidedRecord {
-			[Required]
-			[MaxLength(6)]
-			public string NrBoczny = "";
-			[MaxLength(20)]
-			public string Producent = "";
-			[Required]
-			[MaxLength(20)]
-			public string Model = "";
-			[Required]
-			public Date DataProd;
-			[MaxLength(200)]
-			public string Uwagi = "";
-
-			public override Record Clone() {
-				MaszynaRecord rec = (MaszynaRecord)MemberwiseClone();
-				return rec;
-			}
-
-			public override void Load(RecordReader creator) {
-				Guid = creator.Read_guid();
-				NrBoczny = creator.Read_string();
-				Producent = creator.Read_string();
-				Model = creator.Read_string();
-				DataProd = creator.Read_date();
-				Uwagi = creator.Read_string();
-			}
-		}
-
-		public static class MaszynaSchema {
-
-			internal static RowDelegate<MaszynaRow, string> NrBocznyBeforeEdit;
-			public static void AddNrBocznyBeforeEdit(RowDelegate<MaszynaRow, string> value)
-				=> NrBocznyBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(NrBocznyBeforeEdit, value);
-
-			internal static RowDelegate<MaszynaRow> NrBocznyAfterEdit;
-			public static void AddNrBocznyAfterEdit(RowDelegate<MaszynaRow> value)
-				=> NrBocznyAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(NrBocznyAfterEdit, value);
-
-			internal static RowDelegate<MaszynaRow, string> ProducentBeforeEdit;
-			public static void AddProducentBeforeEdit(RowDelegate<MaszynaRow, string> value)
-				=> ProducentBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(ProducentBeforeEdit, value);
-
-			internal static RowDelegate<MaszynaRow> ProducentAfterEdit;
-			public static void AddProducentAfterEdit(RowDelegate<MaszynaRow> value)
-				=> ProducentAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(ProducentAfterEdit, value);
-
-			internal static RowDelegate<MaszynaRow, string> ModelBeforeEdit;
-			public static void AddModelBeforeEdit(RowDelegate<MaszynaRow, string> value)
-				=> ModelBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(ModelBeforeEdit, value);
-
-			internal static RowDelegate<MaszynaRow> ModelAfterEdit;
-			public static void AddModelAfterEdit(RowDelegate<MaszynaRow> value)
-				=> ModelAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(ModelAfterEdit, value);
-
-			internal static RowDelegate<MaszynaRow, Date> DataProdBeforeEdit;
-			public static void AddDataProdBeforeEdit(RowDelegate<MaszynaRow, Date> value)
-				=> DataProdBeforeEdit = (RowDelegate<MaszynaRow, Date>)Delegate.Combine(DataProdBeforeEdit, value);
-
-			internal static RowDelegate<MaszynaRow> DataProdAfterEdit;
-			public static void AddDataProdAfterEdit(RowDelegate<MaszynaRow> value)
-				=> DataProdAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(DataProdAfterEdit, value);
-
-			internal static RowDelegate<MaszynaRow, string> UwagiBeforeEdit;
-			public static void AddUwagiBeforeEdit(RowDelegate<MaszynaRow, string> value)
-				=> UwagiBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(UwagiBeforeEdit, value);
-
-			internal static RowDelegate<MaszynaRow> UwagiAfterEdit;
-			public static void AddUwagiAfterEdit(RowDelegate<MaszynaRow> value)
-				=> UwagiAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(UwagiAfterEdit, value);
-
-			internal static RowDelegate<MaszynaRow> OnLoaded;
-			public static void AddOnLoaded(RowDelegate<MaszynaRow> value)
-				=> OnLoaded = (RowDelegate<MaszynaRow>)Delegate.Combine(OnLoaded, value);
-
-			internal static RowDelegate<MaszynaRow> OnAdded;
-			public static void AddOnAdded(RowDelegate<MaszynaRow> value)
-				=> OnAdded = (RowDelegate<MaszynaRow>)Delegate.Combine(OnAdded, value);
-
-			internal static RowDelegate<MaszynaRow> OnEditing;
-			public static void AddOnEditing(RowDelegate<MaszynaRow> value)
-				=> OnEditing = (RowDelegate<MaszynaRow>)Delegate.Combine(OnEditing, value);
-
-			internal static RowDelegate<MaszynaRow> OnDeleting;
-			public static void AddOnDeleting(RowDelegate<MaszynaRow> value)
-				=> OnDeleting = (RowDelegate<MaszynaRow>)Delegate.Combine(OnDeleting, value);
-
-			internal static RowDelegate<MaszynaRow> OnDeleted;
-			public static void AddOnDeleted(RowDelegate<MaszynaRow> value)
-				=> OnDeleted = (RowDelegate<MaszynaRow>)Delegate.Combine(OnDeleted, value);
-
-			internal static RowDelegate<MaszynaRow> OnRepacked;
-			public static void AddOnRepacked(RowDelegate<MaszynaRow> value)
-				=> OnRepacked = (RowDelegate<MaszynaRow>)Delegate.Combine(OnRepacked, value);
-
-			internal static RowAccessRightsDelegate<MaszynaRow> OnCalcObjectRight;
-			public static void AddOnCalcObjectRight(RowAccessRightsDelegate<MaszynaRow> value)
-				=> OnCalcObjectRight = (RowAccessRightsDelegate<MaszynaRow>)Delegate.Combine(OnCalcObjectRight, value);
-
-			internal static RowAccessRightsDelegate<MaszynaRow> OnCalcParentsObjectRight;
-			public static void AddOnCalcParentsObjectRight(RowAccessRightsDelegate<MaszynaRow> value)
-				=> OnCalcParentsObjectRight = (RowAccessRightsDelegate<MaszynaRow>)Delegate.Combine(OnCalcParentsObjectRight, value);
-
-			internal static RowReadOnlyDelegate<MaszynaRow> OnCalcReadOnly;
-			public static void AddOnCalcReadOnly(RowReadOnlyDelegate<MaszynaRow> value)
-				=> OnCalcReadOnly = (RowReadOnlyDelegate<MaszynaRow>)Delegate.Combine(OnCalcReadOnly, value);
-
-		}
 
 		private static Soneta.Business.App.TableInfo tableInfoLoty = new Soneta.Business.App.TableInfo.Create<Loty, Lot, LotRecord>("Lot") {
 		};
@@ -830,6 +451,385 @@ namespace Soneta.Szkolenie {
 
 		}
 
+		private static Soneta.Business.App.TableInfo tableInfoMaszyny = new Soneta.Business.App.TableInfo.Create<Maszyny, Maszyna, MaszynaRecord>("Maszyna") {
+		};
+
+		public Maszyny Maszyny => (Maszyny)Session.Tables[tableInfoMaszyny];
+
+		private static Soneta.Business.App.KeyInfo keyInfoMaszynaWgNrBoczny = new Soneta.Business.App.KeyInfo(tableInfoMaszyny, table => new MaszynaTable.WgNrBocznyKey(table)) {
+			Name = "WgNrBoczny",
+			Unique = true,
+			PrimaryKey = true,
+			KeyFields = new[] {"NrBoczny"},
+		};
+
+		/// <summary>
+		/// Klasa implementująca standardową obsługę tabeli obiektów Maszyna.
+		/// Dziedzicząca klasa <see cref="Maszyny"/> zawiera kod użytkownika
+		/// zawierający specyficzną funkcjonalność tabeli, która nie zawiera się w funkcjonalności
+		/// biblioteki <see cref="Soneta.Business"/>.
+		/// </summary>
+		/// <seealso cref="Maszyny"/>
+		/// <seealso cref="MaszynaRow"/>
+		/// <seealso cref="Maszyna"/>
+		/// <seealso cref="Soneta.Business.Table"/>
+		[Caption("Tabela maszyn którymi można odbyć lot")]
+		public abstract partial class MaszynaTable : GuidedTable {
+
+			protected MaszynaTable() {}
+
+			public class WgNrBocznyKey : Key<Maszyna> {
+				internal WgNrBocznyKey(Table table) : base(table) {
+				}
+
+				protected override object[] GetData(Row row, Record rec) => new object[] {
+					((MaszynaRecord)rec).NrBoczny.TrimEnd()
+				};
+
+				public Maszyna this[string nrboczny] => (Maszyna)Find(nrboczny);
+			}
+
+			public WgNrBocznyKey WgNrBoczny => (WgNrBocznyKey)Session.Keys[keyInfoMaszynaWgNrBoczny];
+
+
+			/// <summary>
+			/// Typowane property dostarczające obiekt modułu zawierającegą tą tabelę. Umożliwia dostęp do
+			/// innych obiektów znajdujących się w tym samym module.
+			/// </summary>
+			/// <seealso cref="SzkolenieModule"/>
+			public new SzkolenieModule Module => (SzkolenieModule)base.Module;
+
+			/// <summary>
+			/// Typowany indekser dostarczający obiekty znajdujące się w tej tabeli przy pomocy 
+			/// ID identyfikującego jednoznacznie obiekt w systemie.
+			/// </summary>
+			/// <param name="id">Liczba będąca unikalnym identyfikatorem obiektu. Wartości
+			/// ujemne identyfikują obiekty, które zostały dodane i nie są jeszcze zapisane do bazy danych.</param>
+			/// <seealso cref="Maszyna"/>
+			public new Maszyna this[int id] => (Maszyna)base[id];
+
+			/// <summary>
+			/// Typowany indekser dostarczający obiekty znajdujące się w tej tabeli przy pomocy 
+			/// tablicy ID identyfikujących jednoznacznie obiekt w systemie.
+			/// </summary>
+			/// <param name="id">Tablica liczb będąca unikalnymi identyfikatorami obiektu. Wartości
+			/// ujemne identyfikują obiekty, które zostały dodane i nie są jeszcze zapisane do bazy danych.</param>
+			/// <seealso cref="Maszyna"/>
+			public new Maszyna[] this[int[] ids] => (Maszyna[])base[ids];
+
+			public new Maszyna this[Guid guid] => (Maszyna)base[guid];
+
+			protected override Row CreateRow(RowCreator creator) => new Maszyna();
+
+			[Soneta.Langs.TranslateIgnore]
+			protected override sealed void PrepareNames(StringBuilder names, string divider) {
+				names.Append(divider); names.Append("Guid");
+				names.Append(divider); names.Append("NrBoczny");
+				names.Append(divider); names.Append("Producent");
+				names.Append(divider); names.Append("Model");
+				names.Append(divider); names.Append("DataProd");
+				names.Append(divider); names.Append("Uwagi");
+			}
+
+		}
+
+		public abstract partial class MaszynaRow : GuidedRow {
+
+			private MaszynaRecord record;
+
+			protected override void AssignRecord(Record rec) {
+				record = (MaszynaRecord)rec;
+			}
+
+			protected MaszynaRow() : base(true) {
+			}
+
+			[MaxLength(6)]
+			[Required]
+			public string NrBoczny {
+				get {
+					if (record==null) GetRecord();
+					return record.NrBoczny;
+				}
+				set {
+					MaszynaSchema.NrBocznyBeforeEdit?.Invoke((Maszyna)this, ref value);
+					if (value!=null) value = value.TrimEnd();
+					if (string.IsNullOrEmpty(value)) throw new RequiredException(this, "NrBoczny");
+					if (value.Length>NrBocznyLength) throw new ValueToLongException(this, "NrBoczny", NrBocznyLength);
+					GetEdit(record==null, false);
+					record.NrBoczny = value;
+					if (State!=RowState.Detached) {
+						ResyncSet(keyInfoMaszynaWgNrBoczny);
+						Session.Verifiers.Add(new Maszyna.NrBocznyPoprawny((Maszyna)this));
+					}
+					MaszynaSchema.NrBocznyAfterEdit?.Invoke((Maszyna)this);
+				}
+			}
+
+			public const int NrBocznyLength = 6;
+
+			[MaxLength(20)]
+			public string Producent {
+				get {
+					if (record==null) GetRecord();
+					return record.Producent;
+				}
+				set {
+					MaszynaSchema.ProducentBeforeEdit?.Invoke((Maszyna)this, ref value);
+					if (value!=null) value = value.TrimEnd();
+					if (value.Length>ProducentLength) throw new ValueToLongException(this, "Producent", ProducentLength);
+					GetEdit(record==null, false);
+					record.Producent = value;
+					MaszynaSchema.ProducentAfterEdit?.Invoke((Maszyna)this);
+				}
+			}
+
+			public const int ProducentLength = 20;
+
+			[MaxLength(20)]
+			[Required]
+			public string Model {
+				get {
+					if (record==null) GetRecord();
+					return record.Model;
+				}
+				set {
+					MaszynaSchema.ModelBeforeEdit?.Invoke((Maszyna)this, ref value);
+					if (value!=null) value = value.TrimEnd();
+					if (string.IsNullOrEmpty(value)) throw new RequiredException(this, "Model");
+					if (value.Length>ModelLength) throw new ValueToLongException(this, "Model", ModelLength);
+					GetEdit(record==null, false);
+					record.Model = value;
+					MaszynaSchema.ModelAfterEdit?.Invoke((Maszyna)this);
+				}
+			}
+
+			public const int ModelLength = 20;
+
+			[Required]
+			public Date DataProd {
+				get {
+					if (record==null) GetRecord();
+					return record.DataProd;
+				}
+				set {
+					MaszynaSchema.DataProdBeforeEdit?.Invoke((Maszyna)this, ref value);
+					if (value==Date.MinValue) throw new RequiredException(this, "DataProd");
+					GetEdit(record==null, false);
+					record.DataProd = value;
+					MaszynaSchema.DataProdAfterEdit?.Invoke((Maszyna)this);
+				}
+			}
+
+			[MaxLength(200)]
+			public string Uwagi {
+				get {
+					if (record==null) GetRecord();
+					return record.Uwagi;
+				}
+				set {
+					MaszynaSchema.UwagiBeforeEdit?.Invoke((Maszyna)this, ref value);
+					if (value!=null) value = value.TrimEnd();
+					if (value.Length>UwagiLength) throw new ValueToLongException(this, "Uwagi", UwagiLength);
+					GetEdit(record==null, false);
+					record.Uwagi = value;
+					MaszynaSchema.UwagiAfterEdit?.Invoke((Maszyna)this);
+				}
+			}
+
+			public const int UwagiLength = 200;
+
+			[ChildTable("Rezerwacja", "Soneta.Szkolenie.Rezerwacja", "Maszyna")]
+			public SubTable<Rezerwacja> Fields => (SubTable<Rezerwacja>)Table.Module.Rezerwacje.WgMaszyna.CreateSubTable(this);
+
+			[Browsable(false)]
+			public new Maszyny Table => (Maszyny)base.Table;
+
+			[Browsable(false)]
+			public SzkolenieModule Module => Table.Module;
+
+			protected override Soneta.Business.App.TableInfo TableInfo => tableInfoMaszyny;
+
+			public sealed override AccessRights GetObjectRight() {
+				AccessRights ar = CalcObjectRight();
+				MaszynaSchema.OnCalcObjectRight?.Invoke((Maszyna)this, ref ar);
+				return ar;
+			}
+
+			protected sealed override AccessRights GetParentsObjectRight() {
+				AccessRights result = CalcParentsObjectRight();
+				MaszynaSchema.OnCalcParentsObjectRight?.Invoke((Maszyna)this, ref result);
+				return result;
+			}
+
+			protected override bool CalcReadOnly() {
+				bool result = false;
+				MaszynaSchema.OnCalcReadOnly?.Invoke((Maszyna)this, ref result);
+				return result;
+			}
+
+			class NrBocznyRequiredVerifier : RequiredVerifier {
+				internal NrBocznyRequiredVerifier(IRow row) : base(row, "NrBoczny") {
+				}
+				protected override bool IsValid() => !(string.IsNullOrEmpty(((MaszynaRow)Row).NrBoczny));
+			}
+
+			class ModelRequiredVerifier : RequiredVerifier {
+				internal ModelRequiredVerifier(IRow row) : base(row, "Model") {
+				}
+				protected override bool IsValid() => !(string.IsNullOrEmpty(((MaszynaRow)Row).Model));
+			}
+
+			class DataProdRequiredVerifier : RequiredVerifier {
+				internal DataProdRequiredVerifier(IRow row) : base(row, "DataProd") {
+				}
+				protected override bool IsValid() => !(((MaszynaRow)Row).DataProd==Date.MinValue);
+			}
+
+			protected override void OnAdded() {
+				base.OnAdded();
+				Session.Verifiers.Add(new NrBocznyRequiredVerifier(this));
+				Session.Verifiers.Add(new ModelRequiredVerifier(this));
+				Session.Verifiers.Add(new DataProdRequiredVerifier(this));
+				MaszynaSchema.OnAdded?.Invoke((Maszyna)this);
+			}
+
+			protected override void OnLoaded() {
+				base.OnLoaded();
+				MaszynaSchema.OnLoaded?.Invoke((Maszyna)this);
+			}
+
+			protected override void OnEditing() {
+				base.OnEditing();
+				MaszynaSchema.OnEditing?.Invoke((Maszyna)this);
+			}
+
+			protected override void OnDeleting() {
+				base.OnDeleting();
+				MaszynaSchema.OnDeleting?.Invoke((Maszyna)this);
+			}
+
+			protected override void OnDeleted() {
+				base.OnDeleted();
+				MaszynaSchema.OnDeleted?.Invoke((Maszyna)this);
+			}
+
+			protected override void OnRepacked() {
+				base.OnRepacked();
+				MaszynaSchema.OnRepacked?.Invoke((Maszyna)this);
+			}
+
+		}
+
+		public sealed class MaszynaRecord : GuidedRecord {
+			[Required]
+			[MaxLength(6)]
+			public string NrBoczny = "";
+			[MaxLength(20)]
+			public string Producent = "";
+			[Required]
+			[MaxLength(20)]
+			public string Model = "";
+			[Required]
+			public Date DataProd;
+			[MaxLength(200)]
+			public string Uwagi = "";
+
+			public override Record Clone() {
+				MaszynaRecord rec = (MaszynaRecord)MemberwiseClone();
+				return rec;
+			}
+
+			public override void Load(RecordReader creator) {
+				Guid = creator.Read_guid();
+				NrBoczny = creator.Read_string();
+				Producent = creator.Read_string();
+				Model = creator.Read_string();
+				DataProd = creator.Read_date();
+				Uwagi = creator.Read_string();
+			}
+		}
+
+		public static class MaszynaSchema {
+
+			internal static RowDelegate<MaszynaRow, string> NrBocznyBeforeEdit;
+			public static void AddNrBocznyBeforeEdit(RowDelegate<MaszynaRow, string> value)
+				=> NrBocznyBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(NrBocznyBeforeEdit, value);
+
+			internal static RowDelegate<MaszynaRow> NrBocznyAfterEdit;
+			public static void AddNrBocznyAfterEdit(RowDelegate<MaszynaRow> value)
+				=> NrBocznyAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(NrBocznyAfterEdit, value);
+
+			internal static RowDelegate<MaszynaRow, string> ProducentBeforeEdit;
+			public static void AddProducentBeforeEdit(RowDelegate<MaszynaRow, string> value)
+				=> ProducentBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(ProducentBeforeEdit, value);
+
+			internal static RowDelegate<MaszynaRow> ProducentAfterEdit;
+			public static void AddProducentAfterEdit(RowDelegate<MaszynaRow> value)
+				=> ProducentAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(ProducentAfterEdit, value);
+
+			internal static RowDelegate<MaszynaRow, string> ModelBeforeEdit;
+			public static void AddModelBeforeEdit(RowDelegate<MaszynaRow, string> value)
+				=> ModelBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(ModelBeforeEdit, value);
+
+			internal static RowDelegate<MaszynaRow> ModelAfterEdit;
+			public static void AddModelAfterEdit(RowDelegate<MaszynaRow> value)
+				=> ModelAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(ModelAfterEdit, value);
+
+			internal static RowDelegate<MaszynaRow, Date> DataProdBeforeEdit;
+			public static void AddDataProdBeforeEdit(RowDelegate<MaszynaRow, Date> value)
+				=> DataProdBeforeEdit = (RowDelegate<MaszynaRow, Date>)Delegate.Combine(DataProdBeforeEdit, value);
+
+			internal static RowDelegate<MaszynaRow> DataProdAfterEdit;
+			public static void AddDataProdAfterEdit(RowDelegate<MaszynaRow> value)
+				=> DataProdAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(DataProdAfterEdit, value);
+
+			internal static RowDelegate<MaszynaRow, string> UwagiBeforeEdit;
+			public static void AddUwagiBeforeEdit(RowDelegate<MaszynaRow, string> value)
+				=> UwagiBeforeEdit = (RowDelegate<MaszynaRow, string>)Delegate.Combine(UwagiBeforeEdit, value);
+
+			internal static RowDelegate<MaszynaRow> UwagiAfterEdit;
+			public static void AddUwagiAfterEdit(RowDelegate<MaszynaRow> value)
+				=> UwagiAfterEdit = (RowDelegate<MaszynaRow>)Delegate.Combine(UwagiAfterEdit, value);
+
+			internal static RowDelegate<MaszynaRow> OnLoaded;
+			public static void AddOnLoaded(RowDelegate<MaszynaRow> value)
+				=> OnLoaded = (RowDelegate<MaszynaRow>)Delegate.Combine(OnLoaded, value);
+
+			internal static RowDelegate<MaszynaRow> OnAdded;
+			public static void AddOnAdded(RowDelegate<MaszynaRow> value)
+				=> OnAdded = (RowDelegate<MaszynaRow>)Delegate.Combine(OnAdded, value);
+
+			internal static RowDelegate<MaszynaRow> OnEditing;
+			public static void AddOnEditing(RowDelegate<MaszynaRow> value)
+				=> OnEditing = (RowDelegate<MaszynaRow>)Delegate.Combine(OnEditing, value);
+
+			internal static RowDelegate<MaszynaRow> OnDeleting;
+			public static void AddOnDeleting(RowDelegate<MaszynaRow> value)
+				=> OnDeleting = (RowDelegate<MaszynaRow>)Delegate.Combine(OnDeleting, value);
+
+			internal static RowDelegate<MaszynaRow> OnDeleted;
+			public static void AddOnDeleted(RowDelegate<MaszynaRow> value)
+				=> OnDeleted = (RowDelegate<MaszynaRow>)Delegate.Combine(OnDeleted, value);
+
+			internal static RowDelegate<MaszynaRow> OnRepacked;
+			public static void AddOnRepacked(RowDelegate<MaszynaRow> value)
+				=> OnRepacked = (RowDelegate<MaszynaRow>)Delegate.Combine(OnRepacked, value);
+
+			internal static RowAccessRightsDelegate<MaszynaRow> OnCalcObjectRight;
+			public static void AddOnCalcObjectRight(RowAccessRightsDelegate<MaszynaRow> value)
+				=> OnCalcObjectRight = (RowAccessRightsDelegate<MaszynaRow>)Delegate.Combine(OnCalcObjectRight, value);
+
+			internal static RowAccessRightsDelegate<MaszynaRow> OnCalcParentsObjectRight;
+			public static void AddOnCalcParentsObjectRight(RowAccessRightsDelegate<MaszynaRow> value)
+				=> OnCalcParentsObjectRight = (RowAccessRightsDelegate<MaszynaRow>)Delegate.Combine(OnCalcParentsObjectRight, value);
+
+			internal static RowReadOnlyDelegate<MaszynaRow> OnCalcReadOnly;
+			public static void AddOnCalcReadOnly(RowReadOnlyDelegate<MaszynaRow> value)
+				=> OnCalcReadOnly = (RowReadOnlyDelegate<MaszynaRow>)Delegate.Combine(OnCalcReadOnly, value);
+
+		}
+
 		private static Soneta.Business.App.TableInfo tableInfoRezerwacje = new Soneta.Business.App.TableInfo.Create<Rezerwacje, Rezerwacja, RezerwacjaRecord>("Rezerwac") {
 		};
 
@@ -977,6 +977,8 @@ namespace Soneta.Szkolenie {
 				names.Append(divider); names.Append("Lot");
 				names.Append(divider); names.Append("Maszyna");
 				names.Append(divider); names.Append("Klient");
+				names.Append(divider); names.Append("CenaLotuValue");
+				names.Append(divider); names.Append("CenaLotuSymbol");
 				names.Append(divider); names.Append("CzyOplacona");
 			}
 
@@ -1079,6 +1081,22 @@ namespace Soneta.Szkolenie {
 				}
 			}
 
+			[Description("Cena za lot dla klienta")]
+			[Required]
+			public Currency CenaLotu {
+				get {
+					if (record==null) GetRecord();
+					return record.CenaLotu;
+				}
+				set {
+					RezerwacjaSchema.CenaLotuBeforeEdit?.Invoke((Rezerwacja)this, ref value);
+					if (value==Currency.Zero) throw new RequiredException(this, "CenaLotu");
+					GetEdit(record==null, false);
+					record.CenaLotu = value;
+					RezerwacjaSchema.CenaLotuAfterEdit?.Invoke((Rezerwacja)this);
+				}
+			}
+
 			public CzyOplacone CzyOplacona {
 				get {
 					if (record==null) GetRecord();
@@ -1142,6 +1160,12 @@ namespace Soneta.Szkolenie {
 				protected override bool IsValid() => ((RezerwacjaRow)Row).Klient!=null;
 			}
 
+			class CenaLotuRequiredVerifier : RequiredVerifier {
+				internal CenaLotuRequiredVerifier(IRow row) : base(row, "CenaLotu") {
+				}
+				protected override bool IsValid() => !(((RezerwacjaRow)Row).CenaLotu==Currency.Zero);
+			}
+
 			protected override void OnAdded() {
 				base.OnAdded();
 				Session.Verifiers.Add(new NrRezerwacjiRequiredVerifier(this));
@@ -1151,6 +1175,7 @@ namespace Soneta.Szkolenie {
 				System.Diagnostics.Debug.Assert(record.Maszyna==null || record.Maszyna.State==RowState.Detached || Session==record.Maszyna.Session);
 				Session.Verifiers.Add(new KlientRequiredVerifier(this));
 				System.Diagnostics.Debug.Assert(record.Klient==null || record.Klient.State==RowState.Detached || Session==record.Klient.Session);
+				Session.Verifiers.Add(new CenaLotuRequiredVerifier(this));
 				RezerwacjaSchema.OnAdded?.Invoke((Rezerwacja)this);
 			}
 
@@ -1198,6 +1223,8 @@ namespace Soneta.Szkolenie {
 			[Required]
 			[ParentTable("Kontrahent")]
 			public IRow Klient;
+			[Required]
+			public Currency CenaLotu;
 			public CzyOplacone CzyOplacona;
 
 			public override Record Clone() {
@@ -1210,6 +1237,7 @@ namespace Soneta.Szkolenie {
 				Lot = creator.Read_Row(tableInfoLoty);
 				Maszyna = creator.Read_Row(tableInfoMaszyny);
 				Klient = creator.Read_Row("Kontrahenci");
+				CenaLotu = creator.Read_currency();
 				CzyOplacona = (CzyOplacone)creator.Read_int();
 			}
 		}
@@ -1247,6 +1275,14 @@ namespace Soneta.Szkolenie {
 			internal static RowDelegate<RezerwacjaRow> KlientAfterEdit;
 			public static void AddKlientAfterEdit(RowDelegate<RezerwacjaRow> value)
 				=> KlientAfterEdit = (RowDelegate<RezerwacjaRow>)Delegate.Combine(KlientAfterEdit, value);
+
+			internal static RowDelegate<RezerwacjaRow, Currency> CenaLotuBeforeEdit;
+			public static void AddCenaLotuBeforeEdit(RowDelegate<RezerwacjaRow, Currency> value)
+				=> CenaLotuBeforeEdit = (RowDelegate<RezerwacjaRow, Currency>)Delegate.Combine(CenaLotuBeforeEdit, value);
+
+			internal static RowDelegate<RezerwacjaRow> CenaLotuAfterEdit;
+			public static void AddCenaLotuAfterEdit(RowDelegate<RezerwacjaRow> value)
+				=> CenaLotuAfterEdit = (RowDelegate<RezerwacjaRow>)Delegate.Combine(CenaLotuAfterEdit, value);
 
 			internal static RowDelegate<RezerwacjaRow, CzyOplacone> CzyOplaconaBeforeEdit;
 			public static void AddCzyOplaconaBeforeEdit(RowDelegate<RezerwacjaRow, CzyOplacone> value)
