@@ -5,9 +5,9 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
           RightName="Page:KontrahentLotyPage"
-          Priority="1000"
+          Priority="10"
           DataType="Soneta.CRM.Kontrahent,Soneta.CRM">
-  <Page Name="KontrahentLotyPage" CaptionHtml="Szkolenie/Rezerwacje lotów" DataContext="{new KontrahentExtender}">
+  <Page Name="KontrahentLotyPage" CaptionHtml="Loty widokowe/Rezerwacje lotów" DataContext="{new KontrahentExtender}">
     <Group CaptionHtml="Rezerwacje lotów kontrahenta" Width="*" Height="*">
       <Grid Name="Loty" EditValue="{RezerwacjeLotow}" Width="*" Height="*" 
             EditButton="Auto" IsToolbarVisible="true">
