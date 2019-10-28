@@ -7,7 +7,7 @@
   1. Warstwa "Tests" - porzucamy bo nie będziemy się nim zajmowac na tym szkoleniu.
   1. Ustawiamy wersję enova365 i atrybut AppendTargetFrameworkToOutputPath w Directory.build.props.
   1. Dodajemy odniesienie do business w UI i Output path w UI - ułatwia to pracę nad dodatkiem.
-  1. Uruchomienie dodatku: executable SonetaExplorer.exe z parametrem **/extpatch="_katalog_"**.
+  1. Uruchomienie dodatku: executable SonetaExplorer.exe z parametrem **/extpath="_katalog_"**.
  
 ## Zad.1. Dodawanie własnego widoku z danych enova365 - szablon ViewInfo
   1. Wygenerowanie klasy ViewInfo i pliku viewinfo.xml z szablonu "Soneta - ViewInfo".
@@ -48,12 +48,10 @@
   1. Edycja prostych danych: Maszyna i Lot
   1. Edycja danych z relacjami: Rezerwacja
   1. Nadpisanie OnAdded Rezerwacji
-
-## Tworzenie lookupform.xml
   1. Definiowanie lookupform.xml
   1. Definiowanie GetList.
   
-## Zakładka lotów Kontrahenta - Extender
+## Zad.6 Zakładka lotów Kontrahenta - Extender
   1. Utworzenie extendera KontrahentExtender z szablonu "Soneta - PageForm"
   1. Przeniesienie KontrahentExtender.cs do warswy business
   1. Zdefiniowanie pól extendera: RezerwacjeKontrahenta jako View
