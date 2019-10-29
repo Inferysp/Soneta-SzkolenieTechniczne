@@ -3,13 +3,13 @@
 using Soneta.Business;
 using Soneta.Business.App;
 using Soneta.CRM;
-using Soneta.Szkolenie.UI;
+using Soneta.Szkolenie;
 
 
 // Sposób w jaki należy zarejestrować extender, który później zostanie użyty w UI.
 [assembly: Worker(typeof(KontrahentExtender))]
 
-namespace Soneta.Szkolenie.UI
+namespace Soneta.Szkolenie
 {
     public class KontrahentExtender
     {
