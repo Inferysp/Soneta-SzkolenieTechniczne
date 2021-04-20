@@ -1,5 +1,5 @@
 # Projekt do Szkolenia Technicznego - część warsztatowa
-##Projekt forkowany
+## Projekt forkowany
 
 ## Wstęp
 
